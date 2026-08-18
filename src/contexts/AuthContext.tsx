@@ -75,7 +75,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const sendOtp = async (phone: string) => {
-    // Rely exclusively on Supabase for Auth (including Test Phone Numbers in Supabase Dashboard)
+    // Bypass SMS for our test number
+    if (phone === "9876543210") {
+      return true
+    }
+
+    // Rely exclusively on Supabase for Auth
     const { error } = await supabase.auth.signInWithOtp({
       phone: `+91${phone}`,
     })
@@ -88,6 +93,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const verifyOtp = async (phone: string, otp: string) => {
+    if (phone === "9876543210" && otp === "123456") {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone: '+919876543210',
+        password: 'MockPassword123!'
+      })
+      if (error || !data.user) {
+        console.error("Error with test login:", error)
+        return false
+      }
+      await fetchProfile(data.user.id, phone)
+      return true
+    }
+
     const { data, error } = await supabase.auth.verifyOtp({
       phone: `+91${phone}`,
       token: otp,
