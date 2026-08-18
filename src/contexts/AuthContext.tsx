@@ -75,15 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const sendOtp = async (phone: string) => {
-    // For demo/MVP, if we are simulating payments/auth without a paid Twilio account, 
-    // we use Supabase Email magic links disguised as OTP, OR we just use mock OTP locally.
-    
-    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
-    if (isMock) {
-      console.warn("[DEVELOPMENT MODE] MOCK OTP SENT. USE 123456.")
-      return true
-    }
-
+    // Rely exclusively on Supabase for Auth (including Test Phone Numbers in Supabase Dashboard)
     const { error } = await supabase.auth.signInWithOtp({
       phone: `+91${phone}`,
     })
@@ -96,13 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const verifyOtp = async (phone: string, otp: string) => {
-    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
-    if (isMock && otp === "123456") {
-      // Mock login for UI development without actual Supabase backend active
-      setUser({ id: "mock-id", phone, role: null })
-      return true
-    }
-
     const { data, error } = await supabase.auth.verifyOtp({
       phone: `+91${phone}`,
       token: otp,
@@ -121,28 +106,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setRole = async (role: UserRole) => {
     if (!user) return false
 
-    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
-    if (!isMock) {
-      // Update the profiles table
-      const { error } = await supabase
-        .from("profiles")
-        .upsert({ 
-          id: user.id, 
-          phone: user.phone,
-          full_name: user.fullName || "User",
-          role 
-        })
-      
-      if (error) {
-        console.error("Error updating role:", error)
-        return false
-      }
-      
-      // Fetch fresh profile data to ensure state is in sync
-      await fetchProfile(user.id, user.phone)
-    } else {
-      setUser({ ...user, role })
+    // Update the profiles table
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ 
+        id: user.id, 
+        phone: user.phone,
+        full_name: user.fullName || "User",
+        role 
+      })
+    
+    if (error) {
+      console.error("Error updating role:", error)
+      return false
     }
+    
+    // Fetch fresh profile data to ensure state is in sync
+    await fetchProfile(user.id, user.phone)
     
     if (role === "customer") router.push("/customer/home")
     else if (role === "provider") router.push("/provider/dashboard")
