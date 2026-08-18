@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-teal: #12666A;
+  --color-orange: #F47A2A;
+  --color-green: #557A55;
+  --color-cream: #FBF6EC;
+  --color-ink: #252525;
+  --color-muted: #6F6F6F;
+  --color-line: #F0EBE3;
+  --color-white: #FFFFFF;
+  
+  --color-primary: #12666A;
+  --color-secondary: #F47A2A;
+  
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-playfair);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --teal: #12666A;
+  --orange: #F47A2A;
+  --green: #557A55;
+  --cream: #FBF6EC;
+  --ink: #252525;
+  --muted: #6F6F6F;
+  --line: #F0EBE3;
+  --white: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-[#FBF6EC] text-[#252525] font-sans m-0 antialiased;
   }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading m-0;
+  }
+  
+  button {
+    @apply cursor-pointer border-0 transition-colors;
+    font: inherit;
+  }
+  
+  input, select {
+    font: inherit;
+  }
+  
+  * { box-sizing: border-box; }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Layout utilities */
+  .container-max {
+    @apply max-w-[1280px] mx-auto;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white border border-[#F0EBE3] rounded-3xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)];
+  }
+  .card-hover {
+    @apply hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply py-3 px-5 rounded-full font-bold flex items-center justify-center gap-2 transition-all duration-300;
+  }
+  .btn-primary { 
+    @apply bg-[var(--orange)] text-white hover:bg-[#e06b20] hover:scale-105 shadow-sm; 
+  }
+  .btn-secondary { 
+    @apply bg-white border border-[var(--teal)] text-[var(--teal)] hover:bg-gray-50; 
+  }
+  .btn-teal {
+    @apply bg-[var(--teal)] text-white hover:bg-[#0e5255] hover:scale-105 shadow-sm;
+  }
+  .btn-icon { @apply p-2 rounded-full hover:bg-gray-100; }
+  
+  /* Typography */
+  .eyebrow {
+    @apply text-xs text-[#F47A2A] font-bold uppercase tracking-[0.08em];
+  }
+  .heading-xl { @apply text-4xl md:text-5xl font-bold tracking-tight; }
+  .heading-lg { @apply text-3xl md:text-4xl font-bold; }
+  .heading-md { @apply text-2xl font-bold; }
+  .text-muted { @apply text-[#6F6F6F]; }
+  
+  /* Avatars */
+  .avatar {
+    @apply w-10 h-10 rounded-full bg-[#12666A] flex items-center justify-center text-white font-bold;
+  }
+  
+  /* Badges */
+  .badge { @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+  .badge-green { @apply bg-[#ebf3ea] text-[#557A55]; }
+  .badge-teal { @apply bg-[#e6f2f2] text-[#12666A]; }
+  
+  /* Filter Pills */
+  .pill {
+    @apply whitespace-nowrap py-2 px-4 rounded-full bg-white border border-[#F0EBE3] text-[#6F6F6F] font-medium transition-colors hover:border-[#12666A];
+  }
+  .pill.active {
+    @apply bg-[#12666A] text-white border-[#12666A];
+  }
 }
