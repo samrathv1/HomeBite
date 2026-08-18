@@ -75,14 +75,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const sendOtp = async (phone: string) => {
-    // For demo/MVP, if we are simulating payments/auth without a paid Twilio account, 
-    // we use Supabase Email magic links disguised as OTP, OR we just use mock OTP locally.
-    // Given the prompt "If development OTP/mock auth exists: make sure it is clearly development-only",
-    // we will implement real Supabase OTP (which requires config), but fallback to mock if env says so.
-    
     if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true") {
-      console.warn("[DEVELOPMENT MODE] MOCK OTP SENT. USE 123456.")
-      return true
+      console.warn("[DEVELOPMENT MODE] Creating real session via email workaround. Use OTP 123456.");
+      const mockEmail = `test_${phone}@homebite.demo`;
+      const mockPassword = `HomeBiteMock123!`;
+      
+      // Attempt to sign up the mock user (will fail silently if they already exist)
+      await supabase.auth.signUp({
+        email: mockEmail,
+        password: mockPassword,
+      });
+
+      // Sign in the mock user to get a real session
+      const { error } = await supabase.auth.signInWithPassword({
+        email: mockEmail,
+        password: mockPassword,
+      });
+
+      if (error) {
+        console.error("Mock Auth failed. Ensure 'Confirm email' is turned OFF in Supabase:", error);
+        return false;
+      }
+      return true;
     }
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -98,9 +112,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyOtp = async (phone: string, otp: string) => {
     if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" && otp === "123456") {
-      // Mock login for UI development without actual Supabase backend active
-      setUser({ id: "mock-id", phone, role: null })
-      return true
+      // Mock login already created a session in sendOtp
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await fetchProfile(session.user.id, phone);
+        return true;
+      }
+      return false;
     }
 
     const { data, error } = await supabase.auth.verifyOtp({
