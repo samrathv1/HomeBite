@@ -37,7 +37,7 @@ function VerifyForm() {
       if (success) {
         router.push("/role-selection")
       } else {
-        setError("Invalid OTP. Please use 123456 for the demo.")
+        setError("That verification code is incorrect or expired. Please try again.")
       }
     } catch (err) {
       setError("An error occurred. Please try again.")
@@ -82,11 +82,6 @@ function VerifyForm() {
               {loading ? "Verifying..." : "Verify & Continue"}
             </Button>
             
-            <div className="text-center mt-4">
-              <p className="text-sm text-muted-foreground">
-                <span className="bg-primary/10 text-primary px-2 py-1 rounded-md">Demo Note:</span> Use <strong>123456</strong> as the OTP.
-              </p>
-            </div>
           </form>
         </CardContent>
       </Card>
