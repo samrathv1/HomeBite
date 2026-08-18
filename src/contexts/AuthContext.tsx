@@ -123,8 +123,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Update the profiles table
       const { error } = await supabase
         .from("profiles")
-        .update({ role })
-        .eq("id", user.id)
+        .upsert({ 
+          id: user.id, 
+          phone: user.phone,
+          full_name: user.fullName || "User",
+          role 
+        })
       
       if (error) {
         console.error("Error updating role:", error)
