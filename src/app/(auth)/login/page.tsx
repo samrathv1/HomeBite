@@ -15,20 +15,26 @@ export default function LoginPage() {
   const { sendOtp } = useAuth()
   const router = useRouter()
 
+  const [errorMsg, setErrorMsg] = useState("")
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (phone.length < 10) return
 
     setLoading(true)
+    setErrorMsg("")
     try {
       const success = await sendOtp(phone)
       if (success) {
         // In a real app we'd pass the phone number securely or via state management,
         // using URL params for simplicity in this MVP.
         router.push(`/verify?phone=${encodeURIComponent(phone)}`)
+      } else {
+        setErrorMsg("Failed to send OTP. Please check if your number is correct or try again later.")
       }
     } catch (error) {
       console.error(error)
+      setErrorMsg("An unexpected error occurred.")
     } finally {
       setLoading(false)
     }
@@ -66,6 +72,12 @@ export default function LoginPage() {
                 />
               </div>
             </div>
+            
+            {errorMsg && (
+              <div className="text-sm text-destructive text-center p-2 bg-destructive/10 rounded-md">
+                {errorMsg}
+              </div>
+            )}
             
             <Button type="submit" className="w-full h-12 text-base" disabled={phone.length < 10 || loading}>
               {loading ? "Sending OTP..." : "Continue"}

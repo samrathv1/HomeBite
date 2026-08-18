@@ -78,7 +78,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // For demo/MVP, if we are simulating payments/auth without a paid Twilio account, 
     // we use Supabase Email magic links disguised as OTP, OR we just use mock OTP locally.
     
-    if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true") {
+    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
+    if (isMock) {
       console.warn("[DEVELOPMENT MODE] MOCK OTP SENT. USE 123456.")
       return true
     }
@@ -95,7 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const verifyOtp = async (phone: string, otp: string) => {
-    if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" && otp === "123456") {
+    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
+    if (isMock && otp === "123456") {
       // Mock login for UI development without actual Supabase backend active
       setUser({ id: "mock-id", phone, role: null })
       return true
@@ -119,7 +121,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setRole = async (role: UserRole) => {
     if (!user) return false
 
-    if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH !== "true") {
+    const isMock = process.env.NEXT_PUBLIC_USE_MOCK_AUTH === "true" || process.env.NEXT_PUBLIC_MOCK_AUTH === "true"
+    if (!isMock) {
       // Update the profiles table
       const { error } = await supabase
         .from("profiles")
