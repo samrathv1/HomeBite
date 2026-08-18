@@ -109,12 +109,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Update the profiles table
     const { error } = await supabase
       .from("profiles")
-      .upsert({ 
-        id: user.id, 
-        phone: user.phone,
+      .update({ 
         full_name: user.fullName || "User",
         role 
       })
+      .eq("id", user.id)
     
     if (error) {
       console.error("Error updating role:", error)
@@ -123,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Fetch fresh profile data to ensure state is in sync
     await fetchProfile(user.id, user.phone)
+    router.refresh()
     
     if (role === "customer") router.push("/customer/home")
     else if (role === "provider") router.push("/provider/dashboard")

@@ -173,10 +173,12 @@ ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 
 -- Profiles
 CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Customer Profiles
 CREATE POLICY "Users can view own customer profile" ON public.customer_profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can insert own customer profile" ON public.customer_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own customer profile" ON public.customer_profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Kitchens
