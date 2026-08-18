@@ -10,11 +10,17 @@ export default function RoleSelectionPage() {
   const { setRole, loading } = useAuth()
   const [selectedRole, setSelectedRole] = useState<UserRole>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleContinue = async () => {
     if (!selectedRole) return
     setIsSubmitting(true)
-    await setRole(selectedRole)
+    setError(null)
+    const success = await setRole(selectedRole)
+    if (!success) {
+      setError("Failed to save role. Please check your database connection.")
+      setIsSubmitting(false)
+    }
   }
 
   if (loading) return null
@@ -70,6 +76,11 @@ export default function RoleSelectionPage() {
           </div>
           
           <div className="pt-4">
+            {error && (
+              <div className="text-sm text-destructive text-center mb-4 p-3 bg-destructive/10 rounded-md">
+                {error}
+              </div>
+            )}
             <Button 
               className="w-full h-14 text-lg" 
               disabled={!selectedRole || isSubmitting}

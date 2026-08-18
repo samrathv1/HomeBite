@@ -25,7 +25,7 @@ CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   phone TEXT UNIQUE,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('customer', 'provider', 'admin')),
+  role TEXT CHECK (role IN ('customer', 'provider', 'admin')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -227,10 +227,10 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (id, phone, full_name, role)
-  VALUES (new.id, new.phone, COALESCE(new.raw_user_meta_data->>'full_name', 'User'), COALESCE(new.raw_user_meta_data->>'role', 'customer'));
+  VALUES (new.id, new.phone, COALESCE(new.raw_user_meta_data->>'full_name', 'User'), new.raw_user_meta_data->>'role');
   
   -- If role is customer, also create customer_profile
-  IF COALESCE(new.raw_user_meta_data->>'role', 'customer') = 'customer' THEN
+  IF (new.raw_user_meta_data->>'role') = 'customer' THEN
     INSERT INTO public.customer_profiles (id) VALUES (new.id);
   END IF;
   

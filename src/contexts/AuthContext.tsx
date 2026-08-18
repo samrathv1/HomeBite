@@ -18,7 +18,7 @@ interface AuthContextType {
   loading: boolean
   sendOtp: (phone: string) => Promise<boolean>
   verifyOtp: (phone: string, otp: string) => Promise<boolean>
-  setRole: (role: UserRole) => Promise<void>
+  setRole: (role: UserRole) => Promise<boolean>
   logout: () => Promise<void>
 }
 
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const setRole = async (role: UserRole) => {
-    if (!user) return
+    if (!user) return false
 
     if (process.env.NEXT_PUBLIC_USE_MOCK_AUTH !== "true") {
       // Update the profiles table
@@ -128,15 +128,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         console.error("Error updating role:", error)
-        return
+        return false
       }
+      
+      // Fetch fresh profile data to ensure state is in sync
+      await fetchProfile(user.id, user.phone)
+    } else {
+      setUser({ ...user, role })
     }
-
-    setUser({ ...user, role })
     
     if (role === "customer") router.push("/customer/home")
     else if (role === "provider") router.push("/provider/dashboard")
     else router.push("/admin/dashboard")
+
+    return true
   }
 
   const logout = async () => {
